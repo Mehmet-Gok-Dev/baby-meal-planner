@@ -1,4 +1,14 @@
 // app/account/page.tsx
+
+export const dynamic = 'force-dynamic'; // <-- ADD THIS LINE
+
+// ... rest of your page component code
+import ...
+export default function AccountPage() {
+  // ...
+}
+
+// app/account/page.tsx
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -87,7 +97,7 @@ export default function AccountPage() {
     const body = `Please delete my account and all associated data for the email address: ${email}. I understand this action is permanent.`;
 
     // This triggers the user's default email client
-    window.location.href = `mailto:mehmetgokuk@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = `mailto:your-support-email@example.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   // Show a loading state while fetching data
