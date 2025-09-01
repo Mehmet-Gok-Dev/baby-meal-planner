@@ -24,7 +24,7 @@ export async function GET() {
     // ]
     
     // You can extract just the email strings
-    const emails = data.map(item => item.email);
+    const emails = data.map((item: { email: string }) => item.email);
 
     return NextResponse.json({ emails });
 
