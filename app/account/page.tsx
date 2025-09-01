@@ -1,21 +1,17 @@
 // app/account/page.tsx
-
-export const dynamic = 'force-dynamic'; // <-- ADD THIS LINE
-
-// ... rest of your page component code
-import ...
-export default function AccountPage() {
-  // ...
-}
-
-// app/account/page.tsx
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '../supabase-client';
+import { createClient } from '@supabase/supabase-js';
 import type { Session } from '@supabase/supabase-js';
 import Link from 'next/link';
+
+// Best practice: create client with public keys in a separate file or directly here
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function AccountPage() {
   // State for user session and loading status
@@ -95,9 +91,12 @@ export default function AccountPage() {
     const email = session.user.email;
     const subject = "Account Deletion Request";
     const body = `Please delete my account and all associated data for the email address: ${email}. I understand this action is permanent.`;
+    
+    // IMPORTANT: Replace with your actual support email
+    const supportEmail = 'support@babymealplanner.com';
 
     // This triggers the user's default email client
-    window.location.href = `mailto:your-support-email@example.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   // Show a loading state while fetching data
