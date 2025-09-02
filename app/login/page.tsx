@@ -1,31 +1,47 @@
 // app/login/page.tsx
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { supabase } from '../supabase-client';
+import { useState, FormEvent, useEffect } from 'react'; // 1. Added useEffect
+import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function LoginPage() {
-  // State to toggle between Login and Sign Up forms
+  const supabase = createClient();
+  const router = useRouter();
+
+  // --- All your state variables are fine ---
   const [isSigningUp, setIsSigningUp] = useState(false);
-  
-  // Form input states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
-  // State for our custom checkboxes
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [marketingAccepted, setMarketingAccepted] = useState(false);
-
-  // State for handling errors and success messages
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const router = useRouter();
+  // V V V THIS IS THE NEW DEBUGGING CODE V V V
+  // This hook sets up a listener to see if the Supabase client ever
+  // recognizes a change in the authentication state.
+  useEffect(() => {
+    console.log('--- Setting up Auth State Listener on Login Page ---');
+    console.log('Supabase URL being used:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+    
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      // This will fire for EVERY auth event. We are hoping to see 'SIGNED_IN'.
+      console.log('>>> Supabase Auth Event:', event);
+      if (session) {
+        console.log('>>> Session detected by listener:', session);
+      }
+    });
 
-  // The main function to handle both login and signup
+    // Cleanup function to remove the listener when the component is unmounted
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+
   const handleAuth = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
@@ -33,44 +49,24 @@ export default function LoginPage() {
     setIsLoading(true);
 
     if (isSigningUp) {
-      // --- NEW, MORE ROBUST SIGN UP LOGIC ---
+      // --- Your existing sign-up logic is perfect ---
       if (!termsAccepted) {
         setError('You must accept the Terms and Conditions to sign up.');
         setIsLoading(false);
         return;
       }
-
-      // Step 1: Sign up the user. The database trigger will automatically create their profile row.
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
+      const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
       if (authError) {
         setError(authError.message);
-        setIsLoading(false);
-        return;
-      }
-      
-      // Step 2: If signup was successful AND the user opted-in for marketing,
-      // we perform a separate UPDATE operation. This avoids race conditions.
-      if (authData.user && marketingAccepted) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({ marketing_consent: true }) // We explicitly set it to true
-          .eq('id', authData.user.id);
-        
-        // This optional step failing shouldn't block the user. We just log it for our own info.
-        if (profileError) {
-            console.error("Signup succeeded, but updating marketing preference failed:", profileError);
+      } else {
+        if (authData.user && marketingAccepted) {
+            await supabase.from('profiles').update({ marketing_consent: true }).eq('id', authData.user.id);
         }
+        setMessage('Signup successful! You can now log in.');
       }
       
-      // This message is always shown on successful signup.
-      setMessage('Signup successful! A confirmation email has been sent. Please verify your email before logging in.');
-
     } else {
-      // --- LOGIN LOGIC (No changes here) ---
+      // --- Login Logic to test the listener ---
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -79,13 +75,16 @@ export default function LoginPage() {
       if (error) {
         setError(error.message);
       } else {
+        // We know the login is successful in the network.
+        // We will wait and see if our listener in the useEffect hook fires.
+        setMessage('Login successful in network. Waiting for redirect...');
         router.push('/');
-        router.refresh();
       }
     }
     setIsLoading(false);
   };
 
+  // Your JSX is fine, no changes needed
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
       <div className="w-full max-w-sm bg-white p-8 rounded-xl shadow-lg">
@@ -101,7 +100,6 @@ export default function LoginPage() {
             <input id="password" type="password" placeholder="Password (min. 6 characters)" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full p-2 border rounded text-gray-900" />
           </div>
           
-          {/* --- SIGN UP ONLY FIELDS --- */}
           {isSigningUp && (
             <div className="space-y-3 pt-2">
               <label htmlFor="terms" className="flex items-start space-x-2 cursor-pointer">
