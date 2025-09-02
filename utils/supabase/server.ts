@@ -1,17 +1,13 @@
 // utils/supabase/server.ts
-
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-export function createClient() {
+export const createClient = () => {
   const cookieStore = cookies()
 
-  // Create a server-side client with the service role key for admin tasks if needed,
-  // or use the anon key for user-specific server actions.
-  // For security, it's often better to use the user's context.
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, // Using anon key is safer for many server actions
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         get(name: string) {
@@ -22,8 +18,7 @@ export function createClient() {
             cookieStore.set({ name, value, ...options })
           } catch (error) {
             // The `set` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+            // This can be ignored if you have middleware refreshing user sessions.
           }
         },
         remove(name: string, options: CookieOptions) {
@@ -31,8 +26,7 @@ export function createClient() {
             cookieStore.set({ name, value: '', ...options })
           } catch (error) {
             // The `delete` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+            // This can be ignored if you have middleware refreshing user sessions.
           }
         },
       },
