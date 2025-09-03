@@ -1,11 +1,15 @@
 // app/api/admin/get-emails/route.ts
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+
+// REMOVED the old Supabase and cookies imports
+// ADDED the new server client import
+import { createClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const supabase = createRouteHandlerClient({ cookies });
+  // UPDATED the client to use the new, simpler function
+  const supabase = createClient();
 
+  // The rest of your logic is exactly the same!
   // First, check if the person making this request is an admin (you'd build this logic later)
   // For now, let's assume the check passes.
 

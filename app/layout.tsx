@@ -1,20 +1,15 @@
 // app/layout.tsx
 
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+// --- UPDATED FONT IMPORTS ---
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
+// ---
 import "./globals.css";
 import Analytics from "@/components/Analytics";
-import { Suspense } from 'react'; // <-- 1. IMPORT SUSPENSE
+import { Suspense } from 'react';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// --- DELETED old font declarations; they are no longer needed ---
 
 export const metadata: Metadata = {
   title: "Baby Meal Planner",
@@ -29,10 +24,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        // --- UPDATED className to use the new font variables ---
+        className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}
       >
         {children}
-        {/* 2. WRAP ANALYTICS IN THE SUSPENSE BOUNDARY */}
         <Suspense fallback={null}>
           <Analytics />
         </Suspense>
