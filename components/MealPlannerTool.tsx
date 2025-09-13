@@ -51,7 +51,8 @@ export default function MealPlannerTool() {
       if (data.error) setError(data.error);
       else {
         // Bold selected allergies and keep background
-        const selectedAllergies = Object.keys(allergies).filter(k => allergies[k]);
+        const selectedAllergies = (Object.keys(allergies) as (keyof typeof allergies)[])
+          .filter(k => allergies[k]);
         const allergyNotice = selectedAllergies.length
           ? `You've selected the following allergies: ${selectedAllergies.map(a => `<strong>${a}</strong>`).join(', ')}. While we've instructed the AI to avoid these, please always double-check the ingredients and preparation steps for safety.`
           : '';
