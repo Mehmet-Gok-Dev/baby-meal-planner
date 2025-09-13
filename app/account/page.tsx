@@ -1,5 +1,4 @@
 // FILE: app/account/page.tsx
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -7,10 +6,13 @@ import { useRouter } from 'next/navigation';
 import type { Session } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
+import { useCookieConsent } from '@/contexts/CookieConsentContext'; // --- NEW: Import the context hook ---
 
 export default function AccountPage() {
   const supabase = createClient();
+  const { resetConsent } = useCookieConsent(); // --- NEW: Get the reset function from our context ---
   
+  // All your existing state and logic is perfect
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [marketingConsent, setMarketingConsent] = useState(false);
@@ -19,6 +21,7 @@ export default function AccountPage() {
   const router = useRouter();
 
   const getProfile = useCallback(async (currentSession: Session) => {
+    // ... (This function remains unchanged)
     const { data, error } = await supabase
       .from('profiles')
       .select('marketing_consent')
@@ -36,6 +39,7 @@ export default function AccountPage() {
   }, [supabase]);
 
   useEffect(() => {
+    // ... (This hook remains unchanged)
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (session) {
@@ -55,6 +59,7 @@ export default function AccountPage() {
   }, [router, getProfile, supabase]);
 
   const handleUpdatePreferences = async () => {
+    // ... (This function remains unchanged)
     if (!session) return;
     setMessage('');
     
@@ -73,6 +78,7 @@ export default function AccountPage() {
   };
   
   const handleDeleteAccount = () => {
+    // ... (This function remains unchanged)
     if (!session?.user.email) {
         setMessage('Could not identify your user account. Please try again.');
         setMessageType('error');
@@ -83,8 +89,15 @@ export default function AccountPage() {
     const subject = "Account Deletion Request";
     const body = `Please delete my account and all associated data for the email address: ${email}. I understand this action is permanent.`;
     
-    const supportEmail = 'support@babymealplanner.com';
+    const supportEmail = 'support@babymealsplanner.com';
     window.location.href = `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+  // --- NEW: Handler function for the consent button ---
+  const handleManageConsent = () => {
+    resetConsent();
+    // Provide feedback to the user
+    alert('Your cookie consent has been reset. You will see the consent banner again on your next page load.');
   };
   
   if (isLoading) {
@@ -102,6 +115,7 @@ export default function AccountPage() {
         </div>
 
         <div>
+          {/* ... (Details section remains unchanged) ... */}
           <h2 className="text-xl font-semibold text-gray-700">Details</h2>
           <div className="mt-2 p-4 bg-gray-50 rounded-md text-gray-900">
             <p><strong>Email:</strong> {session?.user.email}</p>
@@ -109,6 +123,7 @@ export default function AccountPage() {
         </div>
 
         <div>
+          {/* ... (Preferences section remains unchanged) ... */}
           <h2 className="text-xl font-semibold text-gray-700">Preferences</h2>
           <div className="mt-2">
             <label className="flex items-center space-x-2 cursor-pointer">
@@ -121,13 +136,34 @@ export default function AccountPage() {
           </button>
         </div>
         
+        {/* --- NEW: Privacy Settings Section --- */}
         <div className="border-t pt-6">
-          <h2 className="text-xl font-semibold text-red-600">Danger Zone</h2>
-          <p className="text-sm text-gray-500 mt-2">To delete your account, you will be prompted to send an email request. This is a permanent action.</p>
-          <button onClick={handleDeleteAccount} className="mt-4 py-2 px-4 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700">
+          <h2 className="text-xl font-semibold text-gray-700">Privacy Settings</h2>
+          <p className="text-sm text-gray-500 mt-2">
+            This will reset your cookie preferences and show the consent banner again, allowing you to make a new choice for analytics and advertising cookies.
+          </p>
+          <button 
+            onClick={handleManageConsent} 
+            className="mt-4 py-2 px-4 border border-gray-300 text-gray-800 font-semibold rounded-md hover:bg-gray-100 transition-colors"
+          >
+            Manage Cookie Consent
+          </button>
+        </div>
+        
+        <div className="border-t pt-6">
+          {/* ... (Account Management section remains unchanged) ... */}
+          <h2 className="text-xl font-semibold text-gray-700">Account Management</h2>
+          <p className="text-sm text-gray-500 mt-2">
+            If you wish to permanently delete your account and all of your saved data, you can start the process here. Please be aware that this action cannot be undone.
+          </p>
+          <button 
+            onClick={handleDeleteAccount} 
+            className="mt-4 py-2 px-4 border border-red-500 text-red-600 font-semibold rounded-md hover:bg-red-50 transition-colors"
+          >
             Request Account Deletion
           </button>
         </div>
+        
         {message && (
           <p className={`mt-4 text-center text-sm ${messageType === 'success' ? 'text-green-600' : 'text-red-600'}`}>
             {message}

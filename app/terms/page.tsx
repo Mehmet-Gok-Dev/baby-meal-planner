@@ -1,70 +1,94 @@
 // app/terms/page.tsx
+import type { Metadata } from 'next';
 import Link from 'next/link';
 
+// Add Metadata for SEO and clear browser tabs
+export const metadata: Metadata = {
+  title: 'Terms & Conditions | Baby Meal Planner',
+  description: 'Read the Terms and Conditions for using babymealsplanner.com and its services.',
+};
+
 export default function TermsPage() {
-  const contactEmail = "your-email@example.com"; // Change this to your actual email
+  const contactEmail = "support@babymealsplanner.com";
 
   return (
     <main className="bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto bg-white p-8 sm:p-12 rounded-lg shadow-lg">
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">📜 Terms & Conditions</h1>
-        <p className="text-sm text-gray-500 mb-8">Effective Date: 1 September 2025 | Last Updated: 1 September 2025</p>
+        <p className="text-sm text-gray-500 mb-8">Effective Date: 10 September 2025 | Last Updated: 10 September 2025</p>
 
         <div className="space-y-8 text-gray-800 prose prose-lg max-w-none">
-          <p>Welcome to Baby Meal Planner. These Terms & Conditions govern your use of our website and services. By accessing or using the Service, you agree to be bound by these terms.</p>
           
+          <section>
+            <p>Welcome to Baby Meals Planner. These Terms & Conditions govern your use of our website <Link href="/" className="text-indigo-600 hover:underline">www.babymealsplanner.com</Link> and the services provided. By accessing or using our site, you agree to be bound by these terms.</p>
+            <p>If you do not agree to these terms, you must not use our site. We recommend that you print a copy of these terms for future reference.</p>
+            <p>These terms of use refer to the following additional terms, which also apply to your use of our site:</p>
+            <ul className="list-disc pl-6">
+              <li>Our <Link href="/privacy" className="text-indigo-600 hover:underline">Privacy Policy</Link>.</li>
+              <li>Our <Link href="/cookies" className="text-indigo-600 hover:underline">Cookie Policy</Link>, which sets out information about the cookies on our site.</li>
+            </ul>
+          </section>
+
           <section>
             <h2 className="text-2xl font-semibold">1. User Accounts</h2>
             <p>To use certain features, you must create an account. You agree to:</p>
             <ul className="list-disc pl-6 space-y-1">
-              <li>Provide accurate and current information</li>
-              <li>Keep your password secure</li>
-              <li>Accept responsibility for all activity under your account</li>
+              <li>Provide accurate and current information.</li>
+              <li>Keep your account details safe. You must treat your password and any other security information as confidential and not disclose it to any third party.</li>
+              <li>Accept responsibility for all activity under your account.</li>
             </ul>
-            <p>We reserve the right to suspend or terminate accounts that violate these terms.</p>
+            <p>We have the right to disable any user account or password, at any time, if in our reasonable opinion you have failed to comply with any of the provisions of these terms of use.</p>
           </section>
-
-          <section className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
-            <h2 className="text-2xl font-semibold text-red-800">2. AI-Generated Content Disclaimer</h2>
-            <p>Our Service provides AI-generated baby meal suggestions for informational purposes only. These are not medical or nutritional advice.</p>
-            <p>You agree that:</p>
-            <ul className="list-disc pl-6 space-y-1">
-              <li>You are solely responsible for evaluating the safety and suitability of any meals for your child</li>
-              <li>You will consult a qualified healthcare provider before making dietary changes</li>
-              <li>You understand that choking risks, allergies, and age-appropriateness must be assessed by you</li>
-            </ul>
-            <p className="font-bold mt-4">We disclaim all liability for any harm resulting from reliance on AI-generated suggestions.</p>
+          
+          <section className="bg-red-50 border-l-4 border-red-500 p-6 rounded-md not-prose">
+            <h2 className="text-2xl font-semibold text-red-800">2. Important Disclaimers on Content</h2>
+            <div className="space-y-4 text-red-900">
+              <p><strong className="font-semibold">Do Not Rely on Information on This Site:</strong> The content on our website is provided for general information only. It is not intended to amount to medical or nutritional advice on which you should rely. You must obtain professional or specialist advice (e.g., from a pediatrician) before taking, or refraining from, any action based on the content on our website.</p>
+              <p><strong className="font-semibold">AI-Generated Content Is Not Approved by Us:</strong> The meal suggestions are automatically generated by an AI system and have not been verified or approved by a human expert. We cannot guarantee the accuracy, completeness, or suitability of the information provided. Any actions taken based on such content are at your own risk.</p>
+              <p><strong className="font-semibold">Your Responsibility:</strong> You agree that you are solely responsible for evaluating the safety of any meals for your child, including assessing choking risks, allergies, and age-appropriateness. Any actions taken based on AI content are at your own risk.</p>
+              <p className="font-bold mt-4">We disclaim all liability for any harm resulting from reliance on AI-generated suggestions.</p>
+            </div>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold">3. Intellectual Property</h2>
-            <p>All content, branding, and functionality on the Service are the property of Mehmet and/or licensors. You may not copy, reproduce, or distribute any part of the Service without permission.</p>
+            <p>We are the owner or the licensee of all intellectual property rights on our site, and in the material published on it. All content, branding, and functionality are the property of <strong className="font-semibold">Sky Social Tech Limited</strong> and/or its licensors.</p>
+            <p>You may not copy, reproduce, scrape, or distribute any part of the Service without our express permission. This includes any text or data mining.</p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold">4. Limitation of Liability</h2>
-            <p>To the fullest extent permitted by law, we are not liable for any direct, indirect, incidental, or consequential damages arising from your use of the Service or reliance on its content.</p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold">5. Indemnity</h2>
-            <p>You agree to indemnify and hold us harmless from any claims, damages, or liabilities arising from your use of the Service or violation of these Terms.</p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-semibold">6. Governing Law</h2>
-            <p>These Terms are governed by the laws of England and Wales. Any disputes will be subject to the exclusive jurisdiction of the courts in the United Kingdom.</p>
+            <h2 className="text-2xl font-semibold">4. Site Usage and Security</h2>
+            <p><strong className="font-semibold">We are not responsible for viruses:</strong> We do not guarantee that our site will be secure or free from bugs or viruses. You are responsible for using your own virus protection software.</p>
+            <p>You must not misuse our site by knowingly introducing malicious material or attempting to gain unauthorized access to our site, which is a criminal offense under the Computer Misuse Act 1990.</p>
+            <p><strong className="font-semibold">Rules about linking to our site:</strong> You may link to our home page in a way that is fair and legal and does not damage our reputation. You must not establish a link that suggests any form of association or endorsement where none exists. We reserve the right to withdraw linking permission without notice.</p>
           </section>
           
           <section>
-            <h2 className="text-2xl font-semibold">7. Changes to Terms</h2>
-            <p>We may update these Terms from time to time. We’ll notify you of material changes via email or on the site. Continued use of the Service after changes means you accept the updated Terms.</p>
+            <h2 className="text-2xl font-semibold">5. Limitation of Liability & Indemnity</h2>
+            <p>To the fullest extent permitted by law, we are not liable for any direct, indirect, incidental, or consequential damages arising from your use of the website or reliance on its content. You agree to indemnify and hold us harmless from any claims arising from your use of the Service or violation of these Terms.</p>
+          </section>
+          
+          <section>
+            <h2 className="text-2xl font-semibold">6. Site Availability and Changes</h2>
+            <p>We may update and change our website from time to time. Access is currently free of charge, but we may introduce paid services in the future.</p>
+            <p>We do not guarantee that our site will always be available or uninterrupted. We may suspend or withdraw our site for business and operational reasons.</p>
+          </section>
+          
+          <section>
+            <h2 className="text-2xl font-semibold">7. Governing Law</h2>
+            <p>These Terms are governed by the laws of England and Wales. Any disputes will be subject to the exclusive jurisdiction of the courts in England and Wales.</p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold">8. Contact</h2>
-            <p>For questions about these Terms, reach out to: <a href={`mailto:${contactEmail}`} className="text-indigo-600 hover:underline">{contactEmail}</a></p>
+            <h2 className="text-2xl font-semibold">8. Changes to Terms & Agreement Transfer</h2>
+            <p>We may update these Terms from time to time. Continued use of the Service after changes means you accept the updated Terms. We may transfer our rights and obligations under these terms to another organization.</p>
           </section>
+          
+          <section>
+            <h2 className="text-2xl font-semibold">9. Contact Us</h2>
+            <p>For questions about these Terms, please contact us at: <a href={`mailto:${contactEmail}`} className="text-indigo-600 hover:underline">{contactEmail}</a></p>
+          </section>
+
         </div>
       </div>
     </main>
