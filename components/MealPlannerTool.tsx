@@ -1,6 +1,11 @@
 'use client';
-
 import { useState } from 'react';
+
+interface Meal {
+  title: string;
+  ingredients: string[];
+  steps: string[];
+}
 
 export default function MealPlannerTool() {
   const [age, setAge] = useState('');
@@ -11,11 +16,11 @@ export default function MealPlannerTool() {
     nuts: false,
     soy: false,
   });
-
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mealIdeas, setMealIdeas] = useState<string[]>([]);
+  const [mealIdeas, setMealIdeas] = useState<Meal[]>([]);
   const [allergyText, setAllergyText] = useState<string>('');
+  const [savedMeals, setSavedMeals] = useState<string[]>([]);
 
   const handleAllergyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
@@ -40,36 +45,48 @@ export default function MealPlannerTool() {
         body: JSON.stringify({ age, ingredients, allergies }),
       });
 
-      if (!response.ok) {
-        if (response.status === 401) setError('Your session has expired. Please log in again.');
-        else setError('Something went wrong. Please try again later.');
-        setIsLoading(false);
+      const data = await response.json();
+      if (!response.ok || data.error) {
+        setError(data.error || 'Something went wrong. Please try again.');
         return;
       }
 
-      const data = await response.json();
-      if (data.error) setError(data.error);
-      else {
-        // Bold selected allergies and keep background
-        const selectedAllergies = (Object.keys(allergies) as (keyof typeof allergies)[])
-          .filter(k => allergies[k]);
-        const allergyNotice = selectedAllergies.length
-          ? `You've selected the following allergies: ${selectedAllergies.map(a => `<strong>${a}</strong>`).join(', ')}. While we've instructed the AI to avoid these, please always double-check the ingredients and preparation steps for safety.`
-          : '';
-        setAllergyText(allergyNotice);
+      const mealsArray: Meal[] = Array.isArray(data.mealIdeas) ? data.mealIdeas : [];
+      setMealIdeas(mealsArray);
 
-        // Remove any “Meal 1:”, “Meal 2:” etc. and split into array for separate boxes
-        const mealsArray = (data.mealIdeas || [])
-          .map((m: string) => m.replace(/Meal\s*\d+\s*:/gi, '').trim())
-          .filter(Boolean);
-        setMealIdeas(mealsArray);
-      }
-
+      const selectedAllergies = (Object.keys(allergies) as (keyof typeof allergies)[])
+        .filter(a => allergies[a]);
+      const allergyNotice = selectedAllergies.length
+        ? `You've selected the following allergies: ${selectedAllergies
+            .map(a => `<strong>${a}</strong>`)
+            .join(', ')}. Please double-check ingredients and preparation steps for safety.`
+        : '';
+      setAllergyText(allergyNotice);
     } catch (err) {
       console.error(err);
       setError('Failed to generate meals. Please check your internet connection.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const saveMeal = async (meal: Meal) => {
+    try {
+      const res = await fetch('/api/save-meal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(meal),
+      });
+
+      if (res.ok) {
+        setSavedMeals(prev => [...prev, meal.title]);
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to save meal.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save meal.');
     }
   };
 
@@ -82,13 +99,16 @@ export default function MealPlannerTool() {
         Get instant, healthy, and safe meal ideas based on the ingredients you provide.
       </p>
 
+      {/* Form */}
       <div className="space-y-4">
         {/* Age */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Baby's Age</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Baby's Age
+          </label>
           <select
             value={age}
-            onChange={(e) => setAge(e.target.value)}
+            onChange={e => setAge(e.target.value)}
             className={`w-full p-2 border border-gray-300 rounded-md ${age ? 'text-black' : 'text-gray-500'}`}
           >
             <option value="" disabled>Choose age</option>
@@ -100,13 +120,14 @@ export default function MealPlannerTool() {
 
         {/* Ingredients */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Ingredients You Have</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Ingredients You Have
+          </label>
           <textarea
             value={ingredients}
-            onChange={(e) => setIngredients(e.target.value)}
+            onChange={e => setIngredients(e.target.value)}
             rows={3}
             className={`w-full p-2 border border-gray-300 rounded-md ${ingredients ? 'text-black' : 'text-gray-500'}`}
-            placeholder=""
           />
         </div>
 
@@ -138,12 +159,14 @@ export default function MealPlannerTool() {
           {isLoading ? 'Generating...' : 'Generate Meals'}
         </button>
 
-        {/* Errors */}
+        {/* Error */}
         {error && (
-          <p className="mt-4 text-center text-sm text-red-600 bg-red-50 p-3 rounded-md">{error}</p>
+          <p className="mt-4 text-center text-sm text-red-600 bg-red-50 p-3 rounded-md">
+            {error}
+          </p>
         )}
 
-        {/* Allergy notice with background */}
+        {/* Allergy Notice */}
         {allergyText && (
           <p
             className="mt-4 text-black text-sm bg-yellow-100 p-3 rounded-md"
@@ -151,14 +174,35 @@ export default function MealPlannerTool() {
           />
         )}
 
-        {/* Separate boxes for each meal */}
-        {mealIdeas.length > 0 && mealIdeas.map((meal, idx) => (
-          <div key={idx} className="mt-4 p-6 bg-gray-50 border border-gray-200 rounded-lg whitespace-pre-wrap text-gray-700">
-            {meal}
-          </div>
-        ))}
+        {/* Meals */}
+        {mealIdeas.length > 0 &&
+          mealIdeas.map((meal, idx) => (
+            <div key={idx} className="mt-4 p-6 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+              <h2 className="text-xl font-bold mb-2">{meal.title}</h2>
+              <p className="font-semibold">Ingredients:</p>
+              <ul className="list-disc list-inside mb-2">
+                {meal.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}
+              </ul>
+              <p className="font-semibold">Steps:</p>
+              <ol className="list-decimal list-inside mb-2">
+                {meal.steps.map((step, i) => <li key={i}>{step}</li>)}
+              </ol>
 
-        {/* Regenerate button */}
+              <button
+                onClick={() => saveMeal(meal)}
+                disabled={savedMeals.includes(meal.title)}
+                className={`mt-2 w-full py-2 ${
+                  savedMeals.includes(meal.title)
+                    ? 'bg-green-500 cursor-not-allowed'
+                    : 'bg-yellow-500 hover:bg-yellow-600'
+                } text-white rounded-md`}
+              >
+                {savedMeals.includes(meal.title) ? 'Saved' : 'Save Meal'}
+              </button>
+            </div>
+          ))}
+
+        {/* Regenerate */}
         {mealIdeas.length > 0 && !isLoading && (
           <button
             onClick={generateMeals}
