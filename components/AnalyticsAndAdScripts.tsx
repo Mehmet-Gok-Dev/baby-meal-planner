@@ -10,21 +10,25 @@ export default function AnalyticsAndAdScripts() {
   const pathname = usePathname();
 
   const GA_TRACKING_ID = 'G-WTWV94YMYT';
-  const ADSENSE_CLIENT_ID = 'ca-pub-XXXXXXXXXXXXXXXX'; // Replace with your AdSense ID if you use ads
+  const ADSENSE_CLIENT_ID = 'ca-pub-XXXXXXXXXXXXXXXX';
 
-  // Debug log whenever consent changes
+  // Initialize Consent Mode before GA
   useEffect(() => {
-    if (consent) {
-      console.log('Cookie Consent decision made:', consent);
-    }
-  }, [consent]);
+    if (typeof window !== 'undefined') {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = window.gtag || function() { window.dataLayer.push(arguments); };
 
-  // Track page views when the route changes (Next.js client navigation)
-  useEffect(() => {
-    if (consent?.analytics && typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('config', GA_TRACKING_ID, {
-        page_path: pathname,
+      window.gtag('consent', 'default', {
+        analytics_storage: consent?.analytics ? 'granted' : 'denied',
+        ad_storage: consent?.advertising ? 'granted' : 'denied',
       });
+    }
+  }, []);
+
+  // Track pageviews on route change
+  useEffect(() => {
+    if (consent?.analytics && typeof window !== 'undefined' && window.gtag) {
+      window.gtag('config', GA_TRACKING_ID, { page_path: pathname });
       console.log('GA pageview tracked:', pathname);
     }
   }, [pathname, consent]);

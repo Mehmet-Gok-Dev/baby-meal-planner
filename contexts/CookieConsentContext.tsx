@@ -1,22 +1,18 @@
-// contexts/CookieConsentContext.tsx
 'use client';
 
 import { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 
-// The shape of the consent state
 export type ConsentState = {
   analytics: boolean;
   advertising: boolean;
 } | null;
 
-// The context type
 type CookieConsentContextType = {
   consent: ConsentState;
   setConsent: (newConsent: NonNullable<ConsentState>) => void;
   resetConsent: () => void;
 };
 
-// Create the context with sensible defaults
 const CookieConsentContext = createContext<CookieConsentContextType>({
   consent: null,
   setConsent: () => {},
@@ -26,7 +22,6 @@ const CookieConsentContext = createContext<CookieConsentContextType>({
 export const CookieConsentProvider = ({ children }: { children: ReactNode }) => {
   const [consent, setConsentState] = useState<ConsentState>(null);
 
-  // Load saved consent on first render
   useEffect(() => {
     const stored = localStorage.getItem('cookie_consent');
     if (stored) {
@@ -39,16 +34,28 @@ export const CookieConsentProvider = ({ children }: { children: ReactNode }) => 
     }
   }, []);
 
-  // Save consent to state + localStorage
   const setConsent = (newConsent: NonNullable<ConsentState>) => {
     setConsentState(newConsent);
     localStorage.setItem('cookie_consent', JSON.stringify(newConsent));
+
+    // Update Google Consent Mode immediately
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('consent', 'update', {
+        analytics_storage: newConsent.analytics ? 'granted' : 'denied',
+        ad_storage: newConsent.advertising ? 'granted' : 'denied',
+      });
+    }
   };
 
-  // Clear consent completely
   const resetConsent = () => {
     setConsentState(null);
     localStorage.removeItem('cookie_consent');
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('consent', 'update', {
+        analytics_storage: 'denied',
+        ad_storage: 'denied',
+      });
+    }
   };
 
   return (
@@ -58,5 +65,4 @@ export const CookieConsentProvider = ({ children }: { children: ReactNode }) => 
   );
 };
 
-// Hook for components to use
 export const useCookieConsent = () => useContext(CookieConsentContext);

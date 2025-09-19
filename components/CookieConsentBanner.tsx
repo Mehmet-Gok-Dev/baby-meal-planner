@@ -1,32 +1,22 @@
-// components/CookieConsentBanner.tsx
 'use client';
 
 import Link from 'next/link';
-import { useCookieConsent } from '@/contexts/CookieConsentContext'; // Adjust path if needed
+import { useCookieConsent } from '@/contexts/CookieConsentContext';
 
 export default function CookieConsentBanner() {
   const { consent, setConsent } = useCookieConsent();
 
-  // If the user has already made a choice, don't show the banner
-  if (consent) {
-    return null;
-  }
+  if (consent) return null;
 
-  const handleAcceptAll = () => {
-    setConsent({ analytics: true, advertising: true });
-  };
-
-  const handleRejectAll = () => {
-    setConsent({ analytics: false, advertising: false });
-  };
+  const handleAcceptAll = () => setConsent({ analytics: true, advertising: true });
+  const handleRejectAll = () => setConsent({ analytics: false, advertising: false });
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-gray-800 text-white p-4 shadow-lg">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-sm text-gray-300">
           We use cookies to enhance your experience and for analytics and advertising.
-          By clicking "Accept All", you agree to our use of cookies.
-          Learn more in our{' '}
+          By clicking "Accept All", you agree to our use of cookies. Learn more in our{' '}
           <Link href="/cookies" className="font-semibold text-white underline hover:text-gray-200">
             Cookie Policy
           </Link>.
