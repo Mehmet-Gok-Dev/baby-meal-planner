@@ -22,6 +22,7 @@ const CookieConsentContext = createContext<CookieConsentContextType>({
 export const CookieConsentProvider = ({ children }: { children: ReactNode }) => {
   const [consent, setConsentState] = useState<ConsentState>(null);
 
+  // Load saved consent from localStorage
   useEffect(() => {
     const stored = localStorage.getItem('cookie_consent');
     if (stored) {
@@ -34,13 +35,13 @@ export const CookieConsentProvider = ({ children }: { children: ReactNode }) => 
     }
   }, []);
 
+  // Update consent in state, localStorage, and Google Consent Mode
   const setConsent = (newConsent: NonNullable<ConsentState>) => {
     setConsentState(newConsent);
     localStorage.setItem('cookie_consent', JSON.stringify(newConsent));
 
-    // Update Google Consent Mode immediately
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('consent', 'update', {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('consent', 'update', {
         analytics_storage: newConsent.analytics ? 'granted' : 'denied',
         ad_storage: newConsent.advertising ? 'granted' : 'denied',
       });
@@ -50,8 +51,9 @@ export const CookieConsentProvider = ({ children }: { children: ReactNode }) => 
   const resetConsent = () => {
     setConsentState(null);
     localStorage.removeItem('cookie_consent');
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('consent', 'update', {
+
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('consent', 'update', {
         analytics_storage: 'denied',
         ad_storage: 'denied',
       });

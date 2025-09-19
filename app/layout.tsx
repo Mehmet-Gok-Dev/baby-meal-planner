@@ -20,16 +20,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body>
-        {/* Wrap everything with the CookieConsentProvider */}
+        {/* Wrap the entire app in CookieConsentProvider */}
         <CookieConsentProvider>
+          {/* Header */}
           <Header />
 
+          {/* Main content */}
           <main>{children}</main>
 
           {/* Cookie consent banner */}
           <CookieConsentBanner />
 
-          {/* Analytics scripts (only loaded if user consents) */}
+          {/* Analytics & AdSense scripts */}
           <AnalyticsAndAdScripts />
         </CookieConsentProvider>
       </body>

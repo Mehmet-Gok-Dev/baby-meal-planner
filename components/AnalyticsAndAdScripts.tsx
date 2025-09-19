@@ -5,6 +5,13 @@ import { useCookieConsent } from '@/contexts/CookieConsentContext';
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
+declare global {
+  interface Window {
+    dataLayer: any[];
+    gtag: (...args: any[]) => void;
+  }
+}
+
 export default function AnalyticsAndAdScripts() {
   const { consent } = useCookieConsent();
   const pathname = usePathname();
@@ -12,20 +19,22 @@ export default function AnalyticsAndAdScripts() {
   const GA_TRACKING_ID = 'G-WTWV94YMYT';
   const ADSENSE_CLIENT_ID = 'ca-pub-XXXXXXXXXXXXXXXX';
 
-  // Initialize Consent Mode before GA
+  // Initialize GA and Consent Mode
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.dataLayer = window.dataLayer || [];
-      window.gtag = window.gtag || function() { window.dataLayer.push(arguments); };
+      window.gtag = window.gtag || function(...args: any[]) {
+        window.dataLayer.push(args);
+      };
 
       window.gtag('consent', 'default', {
         analytics_storage: consent?.analytics ? 'granted' : 'denied',
         ad_storage: consent?.advertising ? 'granted' : 'denied',
       });
     }
-  }, []);
+  }, [consent]);
 
-  // Track pageviews on route change
+  // Track pageviews on SPA navigation
   useEffect(() => {
     if (consent?.analytics && typeof window !== 'undefined' && window.gtag) {
       window.gtag('config', GA_TRACKING_ID, { page_path: pathname });
@@ -35,7 +44,6 @@ export default function AnalyticsAndAdScripts() {
 
   return (
     <>
-      {/* Google Analytics */}
       {consent?.analytics && (
         <>
           <Script
@@ -56,7 +64,6 @@ export default function AnalyticsAndAdScripts() {
         </>
       )}
 
-      {/* Google AdSense */}
       {consent?.advertising && (
         <Script
           id="google-adsense"
