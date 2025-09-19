@@ -5,7 +5,7 @@ import { GeistMono } from 'geist/font/mono';
 import "./globals.css";
 import Header from '@/components/Header';
 
-// --- NEW IMPORTS FOR COOKIE CONSENT ---
+// --- NEW IMPORTS FOR COOKIE CONSENT & GA ---
 import { CookieConsentProvider } from '@/contexts/CookieConsentContext';
 import CookieConsentBanner from '@/components/CookieConsentBanner';
 import AnalyticsAndAdScripts from '@/components/AnalyticsAndAdScripts';
@@ -16,23 +16,20 @@ export const metadata: Metadata = {
   description: "Struggling with what to feed your baby? Get instant, personalized, and healthy meal plans for babies and toddlers. AI-powered and parent-approved.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body>
-        {/* The Provider wraps everything to manage the consent state globally */}
+        {/* Wrap everything with the CookieConsentProvider */}
         <CookieConsentProvider>
           <Header />
-          <main>{children}</main> {/* It's good practice to wrap page content in a <main> tag */}
 
-          {/* The visible banner component. It will only render if consent has not been given. */}
+          <main>{children}</main>
+
+          {/* Cookie consent banner */}
           <CookieConsentBanner />
 
-          {/* This new component replaces your old Analytics component. It will only load scripts if consent is granted. */}
+          {/* Analytics scripts (only loaded if user consents) */}
           <AnalyticsAndAdScripts />
         </CookieConsentProvider>
       </body>

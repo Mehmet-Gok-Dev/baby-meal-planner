@@ -1,63 +1,62 @@
 // contexts/CookieConsentContext.tsx
-'use client'; // This is a client-side context provider
+'use client';
 
 import { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 
-// Define the shape of the consent object
-type ConsentState = {
+// The shape of the consent state
+export type ConsentState = {
   analytics: boolean;
   advertising: boolean;
-};
+} | null;
 
-// Define the shape of the context value, including the reset function
+// The context type
 type CookieConsentContextType = {
-  consent: ConsentState | null;
-  setConsent: (newConsent: ConsentState) => void;
+  consent: ConsentState;
+  setConsent: (newConsent: NonNullable<ConsentState>) => void;
   resetConsent: () => void;
 };
 
-// Create the context with a default value that matches the type
+// Create the context with sensible defaults
 const CookieConsentContext = createContext<CookieConsentContextType>({
   consent: null,
   setConsent: () => {},
   resetConsent: () => {},
 });
 
-// Create the provider component
 export const CookieConsentProvider = ({ children }: { children: ReactNode }) => {
-  const [consent, setConsentState] = useState<ConsentState | null>(null);
+  const [consent, setConsentState] = useState<ConsentState>(null);
 
-  // On initial load, try to get the consent from localStorage
+  // Load saved consent on first render
   useEffect(() => {
-    try {
-      const storedConsent = localStorage.getItem('cookie_consent');
-      if (storedConsent) {
-        setConsentState(JSON.parse(storedConsent));
+    const stored = localStorage.getItem('cookie_consent');
+    if (stored) {
+      try {
+        setConsentState(JSON.parse(stored));
+      } catch (err) {
+        console.error('Invalid cookie consent in localStorage', err);
+        localStorage.removeItem('cookie_consent');
       }
-    } catch (error)      {
-      console.error("Could not parse cookie consent from localStorage", error);
     }
   }, []);
 
-  // This function is called by the banner to save the user's choice
-  const setConsent = (newConsent: ConsentState) => {
+  // Save consent to state + localStorage
+  const setConsent = (newConsent: NonNullable<ConsentState>) => {
     setConsentState(newConsent);
     localStorage.setItem('cookie_consent', JSON.stringify(newConsent));
   };
 
-  // This function is called to reset the user's choice
+  // Clear consent completely
   const resetConsent = () => {
     setConsentState(null);
     localStorage.removeItem('cookie_consent');
   };
 
   return (
-    // Pass the functions down to all child components
     <CookieConsentContext.Provider value={{ consent, setConsent, resetConsent }}>
       {children}
-    </CookieConsentContext.Provider> // <-- THIS LINE IS NOW CORRECT
+    </CookieConsentContext.Provider>
   );
 };
 
-// Create a custom hook for easy access to the context
+// Hook for components to use
 export const useCookieConsent = () => useContext(CookieConsentContext);
