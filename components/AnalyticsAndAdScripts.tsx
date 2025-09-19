@@ -19,14 +19,15 @@ export default function AnalyticsAndAdScripts() {
   const GA_TRACKING_ID = 'G-WTWV94YMYT';
   const ADSENSE_CLIENT_ID = 'ca-pub-XXXXXXXXXXXXXXXX';
 
-  // Initialize GA and Consent Mode
+  // Initialize GA and Consent Mode safely
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.dataLayer = window.dataLayer || [];
-      window.gtag = window.gtag || function(...args: any[]) {
+      window.gtag = window.gtag || function (...args: any[]) {
         window.dataLayer.push(args);
       };
 
+      // Set default consent mode
       window.gtag('consent', 'default', {
         analytics_storage: consent?.analytics ? 'granted' : 'denied',
         ad_storage: consent?.advertising ? 'granted' : 'denied',
@@ -36,34 +37,32 @@ export default function AnalyticsAndAdScripts() {
 
   // Track pageviews on SPA navigation
   useEffect(() => {
-    if (consent?.analytics && typeof window !== 'undefined' && window.gtag) {
+    if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('config', GA_TRACKING_ID, { page_path: pathname });
-      console.log('GA pageview tracked:', pathname);
+      console.log('GA pageview tracked:', pathname, 'Consent:', consent);
     }
   }, [pathname, consent]);
 
   return (
     <>
-      {consent?.analytics && (
-        <>
-          <Script
-            strategy="afterInteractive"
-            src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}
-            onLoad={() => console.log('Google Analytics script loaded')}
-          />
-          <Script id="google-analytics" strategy="afterInteractive">
-            {`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              window.gtag = gtag;
-              gtag('js', new Date());
-              gtag('config', '${GA_TRACKING_ID}', { page_path: window.location.pathname });
-              console.log('Google Analytics initialized with ID: ${GA_TRACKING_ID}');
-            `}
-          </Script>
-        </>
-      )}
+      {/* Google Analytics script always loads */}
+      <Script
+        strategy="afterInteractive"
+        src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}
+        onLoad={() => console.log('Google Analytics script loaded')}
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', '${GA_TRACKING_ID}', { page_path: window.location.pathname });
+          console.log('Google Analytics initialized with ID: ${GA_TRACKING_ID}');
+        `}
+      </Script>
 
+      {/* Google AdSense only loads if consent given */}
       {consent?.advertising && (
         <Script
           id="google-adsense"
