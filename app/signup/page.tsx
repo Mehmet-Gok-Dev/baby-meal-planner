@@ -10,17 +10,16 @@ export default function SignUpPage() {
   const supabase = createClient();
   const router = useRouter();
 
-  // State for all form fields and messages
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
-  
+
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Redirect if a user is already logged in
+  // Redirect if user already logged in
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -43,25 +42,38 @@ export default function SignUpPage() {
       return;
     }
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          marketing_consent: marketingConsent,
+    try {
+      // ✅ Only sign up user, trigger will insert into profiles
+      const { error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            marketing_consent: marketingConsent,
+          },
         },
-      },
-    });
+      });
 
-    if (error) {
-      setMessage(error.message);
-      setMessageType('error');
-    } else {
+      if (authError) {
+        setMessage(authError.message);
+        setMessageType('error');
+        return;
+      }
+
+      // Success
       setMessage('Sign-up successful! Please check your email to confirm your account.');
       setMessageType('success');
+      setEmail('');
+      setPassword('');
+      setTermsAccepted(false);
+      setMarketingConsent(false);
+
+    } catch (err) {
+      setMessage('Unexpected error: ' + err);
+      setMessageType('error');
     }
   };
-  
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -74,7 +86,7 @@ export default function SignUpPage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
       <div className="w-full max-w-sm p-8 space-y-6 bg-white rounded-xl shadow-lg">
         <h1 className="text-3xl font-bold text-center text-gray-800">Create Your Account</h1>
-        
+
         <form onSubmit={handleSignUp} className="space-y-4">
           {/* Email Input */}
           <div>
@@ -103,7 +115,7 @@ export default function SignUpPage() {
             />
           </div>
 
-          {/* Checkboxes Section */}
+          {/* Checkboxes */}
           <div className="space-y-3 pt-2">
             <div className="flex items-start">
               <input
@@ -114,17 +126,14 @@ export default function SignUpPage() {
                 onChange={(e) => setTermsAccepted(e.target.checked)}
                 className="h-4 w-4 mt-1 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
               />
-              {/* --- THIS IS THE UPDATED LABEL --- */}
               <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
                 By creating an account, you agree to our{' '}
                 <Link href="/terms" target="_blank" className="font-medium text-indigo-600 hover:underline">
                   Terms and Conditions
-                </Link>{' '}
-                and acknowledge you have read our{' '}
+                </Link> and acknowledge you have read our{' '}
                 <Link href="/privacy" target="_blank" className="font-medium text-indigo-600 hover:underline">
                   Privacy Policy
-                </Link>{' '}
-                and{' '}
+                </Link> and{' '}
                 <Link href="/cookies" target="_blank" className="font-medium text-indigo-600 hover:underline">
                   Cookie Policy
                 </Link>.
@@ -153,7 +162,7 @@ export default function SignUpPage() {
           >
             Sign Up
           </button>
-          
+
           {message && (
             <p className={`mt-2 text-center text-sm ${messageType === 'success' ? 'text-green-600' : 'text-red-600'}`}>
               {message}
