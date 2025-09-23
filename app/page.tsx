@@ -1,11 +1,10 @@
-// app/page.tsx
-
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import MealPlannerTool from "@/components/MealPlannerTool";
+import Link from "next/link";
 
-// ✅ Add SEO metadata
+// ✅ SEO metadata
 export const metadata = {
   title: "Baby Meals Planner – Healthy Meal Ideas for Your Baby",
   description:
@@ -40,8 +39,16 @@ export default async function HomePage() {
 
   return (
     <>
-      <main className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50">
+      <main className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50 space-y-8">
         <MealPlannerTool />
+
+        {/* Reviews Button */}
+        <Link
+          href="/reviews"
+          className="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 font-semibold"
+        >
+          See Reviews & Leave Feedback
+        </Link>
       </main>
 
       {/* Marketing Section */}
