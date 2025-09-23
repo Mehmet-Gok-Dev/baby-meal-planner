@@ -5,6 +5,13 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import MealPlannerTool from "@/components/MealPlannerTool";
 
+// ✅ Add SEO metadata
+export const metadata = {
+  title: "Baby Meals Planner – Healthy Meal Ideas for Your Baby",
+  description:
+    "Get healthy, safe baby meal ideas based on age, ingredients, and allergies.",
+};
+
 export default async function HomePage() {
   const cookieStore = cookies();
 

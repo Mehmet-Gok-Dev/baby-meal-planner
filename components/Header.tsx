@@ -1,4 +1,3 @@
-// components/Header.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -34,15 +33,15 @@ export default function Header() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setIsMenuOpen(false);
-    router.push("/login"); // 👈 immediately redirect to login
+    router.push("/login"); // immediately redirect to login
   };
 
   return (
     <header className="bg-white shadow-md relative z-10">
       <nav className="max-w-4xl mx-auto p-4 flex justify-between items-center">
-        {/* Logo/Brand Name */}
-        <Link href="/" className="text-xl font-bold text-indigo-600">
-          👶 Baby Meals Planner
+        {/* Logo */}
+        <Link href="/" className="flex items-center">
+          <img src="/logo.svg" alt="Baby Meals Planner" width={150} height={50} />
         </Link>
 
         {/* Hamburger Menu Button */}
